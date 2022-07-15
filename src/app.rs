@@ -1,5 +1,4 @@
 use egui_extras::RetainedImage;
-use rfd;
 use std::future::Future;
 
 pub enum Message {
@@ -53,19 +52,12 @@ impl eframe::App for MyApp {
 
         ctx.request_repaint();
 
-        loop {
-            match self.message_channel.1.try_recv() {
-                Ok(_message) => {
-                    match _message {
-                        Message::ImageLoaded(new_image) => {
-                            image.replace(new_image);
-                        }
-                    };
+        while let Ok(message) = self.message_channel.1.try_recv() {
+            match message {
+                Message::ImageLoaded(new_image) => {
+                    image.replace(new_image);
                 }
-                Err(_) => {
-                    break;
-                }
-            }
+            };
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
