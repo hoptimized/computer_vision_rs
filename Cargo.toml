@@ -1,15 +1,13 @@
 [package]
-name = "eframe_template"
-default-run = "eframe_template_bin"
+name = "computer_vision_rs"
+default-run = "computer_vision_rs_bin"
 version = "0.1.0"
-authors = ["Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"]
+authors = ["Tim Hopp <tim11071992@gmail.com>"]
 edition = "2021"
 rust-version = "1.60"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [[bin]]
-name = "eframe_template_bin"
+name = "computer_vision_rs_bin"
 path = "src/main.rs"
 
 [lib]
@@ -34,13 +32,3 @@ tracing-wasm = "0.2"
 [profile.release]
 opt-level = 2 # fast and small wasm
 
-
-[patch.crates-io]
-
-# If you want to use the bleeding edge version of egui and eframe:
-# egui = { git = "https://github.com/emilk/egui", branch = "master" }
-# eframe = { git = "https://github.com/emilk/egui", branch = "master" }
-
-# If you fork https://github.com/emilk/egui you can test with:
-# egui = { path = "../egui/egui" }
-# eframe = { path = "../egui/eframe" }
