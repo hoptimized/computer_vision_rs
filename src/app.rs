@@ -1,6 +1,5 @@
-use std::future::Future;
 use egui_extras::RetainedImage;
-use rfd;
+use std::future::Future;
 
 pub enum Message {
     ImageLoaded(RetainedImage),
@@ -49,26 +48,16 @@ impl eframe::App for MyApp {
 
     /// Called each time the UI needs repainting
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let Self {
-            image,
-            ..
-        } = self;
+        let Self { image, .. } = self;
 
         ctx.request_repaint();
 
-        loop {
-            match self.message_channel.1.try_recv() {
-                Ok(_message) => {
-                    match _message {
-                        Message::ImageLoaded(new_image) => {
-                            image.replace(new_image);
-                        }
-                    };
+        while let Ok(message) = self.message_channel.1.try_recv() {
+            match message {
+                Message::ImageLoaded(new_image) => {
+                    image.replace(new_image);
                 }
-                Err(_) => {
-                    break;
-                }
-            }
+            };
         }
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -89,7 +78,7 @@ impl eframe::App for MyApp {
 
                     if let Some(file) = file {
                         let data = file.read().await;
-                        
+
                         let new_image = RetainedImage::from_image_bytes("foo", &*data);
                         if let Ok(new_image) = new_image {
                             message_sender.send(Message::ImageLoaded(new_image)).ok();
