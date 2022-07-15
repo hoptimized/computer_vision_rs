@@ -11,6 +11,6 @@ fn main() {
     eframe::run_native(
         "computer_vision_rs",
         native_options,
-        Box::new(|cc| Box::new(computer_vision_rs::TemplateApp::new(cc))),
+        Box::new(|cc| Box::new(computer_vision_rs::MyApp::new(cc))),
     );
 }
