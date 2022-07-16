@@ -13,9 +13,11 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-      - run: rustup target add wasm32-unknown-unknown
+      - run: |
+          rustup target add wasm32-unknown-unknown
+          cargo install wasm-bindgen-cli
+          cargo update -p wasm-bindgen
       - run: ./build_web.sh
-      - name: "Deploy"
-        uses: JamesIves/github-pages-deploy-action@v4
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docs
