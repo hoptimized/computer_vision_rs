@@ -1,24 +1,22 @@
 name: CI
-on: [push, pull_request]
+on: [push]
 jobs:
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: "Checkout repository"
+        uses: actions/checkout@v2
       - name: "Install toolchain"
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
-      - name: "Install rustfmt"
-        run: rustup component add rustfmt
       - name: "Rustfmt"
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: |
+          rustup component add rustfmt
+          cargo fmt --all -- --check
   validation:
     strategy:
       fail-fast: false
@@ -43,7 +41,8 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - name: "Checkout repository"
+        uses: actions/checkout@v2
       - name: "Install toolchain"
         uses: actions-rs/toolchain@v1
         with:
@@ -71,10 +70,7 @@ jobs:
         with:
           command: test
           args: --target ${{ matrix.target }} ${{ matrix.flags }}
-      - name: "Install clippy"
-        run: rustup component add clippy
       - name: "Clippy"
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --target ${{ matrix.target }} ${{ matrix.flags }} -- -D warnings
+        run: |
+          rustup component add clippy
+          cargo clippy --target ${{ matrix.target }} ${{ matrix.flags }} -- -D warnings
