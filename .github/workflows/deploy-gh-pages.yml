@@ -1,8 +1,7 @@
 name: "Deploy gh-pages"
-
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "deployment-automation" ]
   workflow_dispatch:
 jobs:
   deploy:
