@@ -1,45 +1,24 @@
-
 name: CI
-
 on: [push, pull_request]
-
-env:
-  # This is required to enable the web_sys clipboard API which egui_web uses
-  # https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.Clipboard.html
-  # https://rustwasm.github.io/docs/wasm-bindgen/web-sys/unstable-apis.html
-  RUSTFLAGS: --cfg=web_sys_unstable_apis
-
 jobs:
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: "Install toolchain"
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
-      - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
+      - name: "Install rustfmt"
+        run: rustup component add rustfmt
+      - name: "Rustfmt"
+        uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
   validation:
     strategy:
       fail-fast: false
@@ -64,32 +43,38 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     steps:
-      - name: "checkout"
-        uses: actions/checkout@v2
-      - name: "[Ubuntu] install dependencies"
-        if: matrix.name == 'Ubuntu'
-        run: sudo apt update && sudo apt install libgtk-3-dev
-      - name: "install toolchain"
+      - uses: actions/checkout@v2
+      - name: "Install toolchain"
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
-      - name: "[WASM] rustup"
+      - name: "[WASM] Add target"
         if: matrix.name == 'WASM32'
         run: rustup target add wasm32-unknown-unknown
-      - name: "build"
+      - name: "[Ubuntu] Install build dependencies"
+        if: matrix.name == 'Ubuntu'
+        run: sudo apt update && sudo apt install libgtk-3-dev
+      - name: "Build"
         uses: actions-rs/cargo@v1
         with:
           command: build
           args: --target ${{ matrix.target }} ${{ matrix.flags }}
-      - name: "[Ubuntu] install test dependencies"
+      - name: "[Ubuntu] Install test dependencies"
         if: matrix.name == 'Ubuntu'
         run: sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libspeechd-dev libxkbcommon-dev libssl-dev
-      - name: test
+      - name: "Test"
         # FIXME
         if: matrix.name != 'WASM32'
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --target ${{ matrix.target }} ${{ matrix.flags }}
+      - name: "Install clippy"
+        run: rustup component add clippy
+      - name: "Clippy"
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
