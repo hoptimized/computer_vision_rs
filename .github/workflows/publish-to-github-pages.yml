@@ -8,6 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: JamesIves/github-pages-deploy-action@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup target add wasm32-unknown-unknown
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all-features --lib --target wasm32-unknown-unknown
+      - name: "Deploy"
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docs
