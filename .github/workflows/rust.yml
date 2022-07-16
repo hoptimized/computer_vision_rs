@@ -58,7 +58,7 @@ jobs:
         with:
           command: check
           args: --target ${{ matrix.target }} --all-features
-      - name: [Ubuntu] install test dependencies
+      - name: "[Ubuntu] install test dependencies"
         run: sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libspeechd-dev libxkbcommon-dev libssl-dev
       - uses: actions-rs/cargo@v1
         with:
