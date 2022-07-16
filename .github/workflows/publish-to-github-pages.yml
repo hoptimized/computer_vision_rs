@@ -8,12 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: EdricChan03/action-build-deploy-ghpages@v2
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ github.token }}
-          gh_pages_branch: 'gh-pages'
-          gh_pages_dist_folder: '_site'
-          gh_pages_commit_message: 'Deploy commit $GITHUB_SHA\n\nAutodeployed using $GITHUB_ACTION in $GITHUB_WORKFLOW'
-          git_force: 'false'
-          override_gh_pages_branch: 'false'
-          gh_pages_add_no_jekyll: 'true'
+          folder: docs
