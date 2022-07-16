@@ -18,6 +18,7 @@ jobs:
           rustup component add rustfmt
           cargo fmt --all -- --check
   validation:
+    needs: fmt
     strategy:
       fail-fast: false
       matrix:
@@ -74,3 +75,28 @@ jobs:
         run: |
           rustup component add clippy
           cargo clippy --target ${{ matrix.target }} ${{ matrix.flags }} -- -D warnings
+  deploy:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v2
+      - name: "Install rust toolchain"
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: "Install WASM build dependencies"
+        run: |
+          sudo apt update && sudo apt install binaryen
+          rustup target add wasm32-unknown-unknown
+          cargo install wasm-bindgen-cli
+          cargo update -p wasm-bindgen
+      - name: "Build"
+        run: ./build_web.sh
+      - name: "Deploy to gh-pages"
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist

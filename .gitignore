@@ -1,2 +1,4 @@
 /target
 /.idea
+/dist/computer_vision_rs.js
+/dist/computer_vision_rs_bg.wasm
