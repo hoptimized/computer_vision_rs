@@ -5,11 +5,19 @@ use std::sync::mpsc;
 
 mod image_frame;
 mod operations;
+mod panels;
 
 use image_frame::ImageFrame;
+use panels::TopPanel;
 
 pub enum GuiAction {
     OpenFileDialog,
+    ApplyGrayscale,
+    ApplyInvert,
+    AcceptOperation,
+    DiscardOperation,
+    ResetAll,
+
     LoadImage(Option<FileHandle>),
     ImageLoaded(DynamicImage),
 }
@@ -25,6 +33,9 @@ pub trait View {
 pub struct MyApp {
     #[serde(skip)]
     message_channel: (mpsc::Sender<GuiAction>, mpsc::Receiver<GuiAction>),
+
+    #[serde(skip)]
+    top_panel: TopPanel,
 
     #[serde(skip)]
     view_current: ImageFrame,
@@ -43,6 +54,7 @@ impl Default for MyApp {
 
         Self {
             message_channel: (tx.clone(), rx),
+            top_panel: TopPanel::new(tx.clone()),
             view_current: ImageFrame::new("Current", true, tx.clone()),
             view_preview: ImageFrame::new("Preview", false, tx),
             model_current: None,
@@ -137,62 +149,17 @@ impl eframe::App for MyApp {
                 GuiAction::OpenFileDialog => self.open_file_dialog(),
                 GuiAction::LoadImage(file) => self.load_new_image(file),
                 GuiAction::ImageLoaded(new_image) => self.reset(Some(new_image)),
+                GuiAction::ApplyGrayscale => self.preview_operation(operations::grayscale),
+                GuiAction::ApplyInvert => self.preview_operation(operations::invert),
+                GuiAction::AcceptOperation => self.accept_operation(),
+                GuiAction::DiscardOperation => self.discard_operation(),
+                GuiAction::ResetAll => self.reset(None),
             };
         }
 
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            egui::menu::bar(ui, |ui| {
-                let has_current = self.model_current.is_some();
-                let has_preview = self.model_preview.is_some();
-
-                ui.menu_button("File", |ui| {
-                    if ui.button("open").clicked() {
-                        self.open_file_dialog();
-                    }
-
-                    ui.separator();
-
-                    if ui
-                        .add_enabled(has_current, egui::Button::new("grayscale"))
-                        .clicked()
-                    {
-                        self.preview_operation(operations::grayscale);
-                    }
-
-                    if ui
-                        .add_enabled(has_current, egui::Button::new("invert"))
-                        .clicked()
-                    {
-                        self.preview_operation(operations::invert);
-                    }
-
-                    ui.separator();
-
-                    if ui
-                        .add_enabled(has_preview, egui::Button::new("accept"))
-                        .clicked()
-                    {
-                        self.accept_operation();
-                    }
-
-                    if ui
-                        .add_enabled(has_preview, egui::Button::new("discard"))
-                        .clicked()
-                    {
-                        self.discard_operation();
-                    }
-
-                    ui.separator();
-
-                    if ui
-                        .add_enabled(has_current || has_preview, egui::Button::new("reset"))
-                        .clicked()
-                    {
-                        self.reset(None);
-                    }
-                });
-            });
-        });
+        self.top_panel.set_has_current(self.model_current.is_some());
+        self.top_panel.set_has_preview(self.model_preview.is_some());
+        self.top_panel.show(ctx);
 
         egui::CentralPanel::default().show(ctx, |_ui| {
             self.view_current.show(ctx);
