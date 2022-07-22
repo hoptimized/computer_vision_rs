@@ -1,9 +1,9 @@
+use super::View;
+use crate::app::viewmodel;
+use crate::app::viewmodel::image_frame::PropertyChangedNotification;
 use egui::{ColorImage, Context, Ui};
 use egui_extras::RetainedImage;
 use image::DynamicImage;
-use super::View;
-use crate::app::{viewmodel};
-use crate::app::viewmodel::image_frame::PropertyChangedNotification;
 
 pub struct ImageFrame {
     accept_input: bool,
@@ -75,10 +75,14 @@ impl View for ImageFrame {
 
         if let Ok(notification) = self.vm_rx.try_recv() {
             match notification {
-                PropertyChangedNotification::AcceptInput => self.accept_input = self.viewmodel.get_accept_input(),
+                PropertyChangedNotification::AcceptInput => {
+                    self.accept_input = self.viewmodel.get_accept_input()
+                }
                 PropertyChangedNotification::Image => self.set_image(&*self.viewmodel.get_image()),
                 PropertyChangedNotification::Open => self.open = self.viewmodel.get_open(),
-                PropertyChangedNotification::Title => self.title = self.viewmodel.get_title().clone(),
+                PropertyChangedNotification::Title => {
+                    self.title = self.viewmodel.get_title().clone()
+                }
             }
         }
 

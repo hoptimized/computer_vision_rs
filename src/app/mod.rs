@@ -1,6 +1,6 @@
 use rfd::FileHandle;
 use std::future::Future;
-use std::sync::{Arc, mpsc};
+use std::sync::{mpsc, Arc};
 
 mod model;
 mod view;
@@ -41,21 +41,22 @@ impl Default for MyApp {
                 tx.clone(),
                 Arc::clone(&image_service),
                 Arc::clone(&model_current),
-                Arc::clone(&model_preview)))),
-            Box::new(view::CentralPanel::new(
-                vec![
-                    Box::new(view::ImageFrame::new(viewmodel::ImageFrame::new(
-                        "Current",
-                        true,
-                        tx.clone(),
-                        model_current.clone()))),
-                    Box::new(view::ImageFrame::new(viewmodel::ImageFrame::new(
-                        "Preview",
-                        false,
-                        tx.clone(),
-                        model_preview.clone()))),
-                ]
-            )),
+                Arc::clone(&model_preview),
+            ))),
+            Box::new(view::CentralPanel::new(vec![
+                Box::new(view::ImageFrame::new(viewmodel::ImageFrame::new(
+                    "Current",
+                    true,
+                    tx.clone(),
+                    model_current.clone(),
+                ))),
+                Box::new(view::ImageFrame::new(viewmodel::ImageFrame::new(
+                    "Preview",
+                    false,
+                    tx.clone(),
+                    model_preview.clone(),
+                ))),
+            ])),
         ];
 
         Self {

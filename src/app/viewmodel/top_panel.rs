@@ -1,7 +1,7 @@
-use crate::app::{GuiAction, model};
-use std::sync::{Arc, mpsc};
+use crate::app::model::{operations, ImageService};
+use crate::app::{model, GuiAction};
+use std::sync::{mpsc, Arc};
 use tokio::sync::broadcast;
-use crate::app::model::{ImageService, operations};
 
 #[derive(Clone)]
 pub enum PropertyChangedNotification {
@@ -11,7 +11,10 @@ pub enum PropertyChangedNotification {
 
 pub struct TopPanel {
     tx: mpsc::Sender<GuiAction>,
-    view_channel: (broadcast::Sender<PropertyChangedNotification>, broadcast::Receiver<PropertyChangedNotification>),
+    view_channel: (
+        broadcast::Sender<PropertyChangedNotification>,
+        broadcast::Receiver<PropertyChangedNotification>,
+    ),
 
     // properties
     has_current: bool,
@@ -26,7 +29,12 @@ pub struct TopPanel {
 }
 
 impl TopPanel {
-    pub fn new(tx: mpsc::Sender<GuiAction>, image_service: Arc<ImageService>, current_image: Arc<model::Image>, preview_image: Arc<model::Image>) -> Self {
+    pub fn new(
+        tx: mpsc::Sender<GuiAction>,
+        image_service: Arc<ImageService>,
+        current_image: Arc<model::Image>,
+        preview_image: Arc<model::Image>,
+    ) -> Self {
         let current_image_rx = current_image.get_property_changed_rx();
         let preview_image_rx = preview_image.get_property_changed_rx();
 
@@ -92,12 +100,18 @@ impl TopPanel {
     #[allow(dead_code)]
     fn set_has_current(&mut self, has_current: bool) {
         self.has_current = has_current;
-        self.view_channel.0.send(PropertyChangedNotification::HasCurrent).ok();
+        self.view_channel
+            .0
+            .send(PropertyChangedNotification::HasCurrent)
+            .ok();
     }
 
     #[allow(dead_code)]
     fn set_has_preview(&mut self, has_preview: bool) {
         self.has_preview = has_preview;
-        self.view_channel.0.send(PropertyChangedNotification::HasPreview).ok();
+        self.view_channel
+            .0
+            .send(PropertyChangedNotification::HasPreview)
+            .ok();
     }
 }
