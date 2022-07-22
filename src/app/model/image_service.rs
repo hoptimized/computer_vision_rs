@@ -36,7 +36,7 @@ impl ImageService {
                 Message::ImageLoaded(new_image) => self.reset(Some(new_image)),
             }
         }
-        while let Ok(_) = self.message_channel.1.try_recv() {}
+        while self.message_channel.1.try_recv().is_ok() {}
     }
 
     pub fn load_new_image(&self, file: Option<FileHandle>) {

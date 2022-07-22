@@ -56,11 +56,11 @@ impl TopPanel {
     }
 
     pub fn process_messages(&mut self) {
-        if let Ok(_) = self.current_image_rx.try_recv() {
+        if self.current_image_rx.try_recv().is_ok() {
             self.set_has_current(self.current_image.get().is_some());
         }
 
-        if let Ok(_) = self.preview_image_rx.try_recv() {
+        if self.preview_image_rx.try_recv().is_ok() {
             self.set_has_preview(self.preview_image.get().is_some());
         }
     }
