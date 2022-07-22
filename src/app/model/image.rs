@@ -1,10 +1,13 @@
-use std::sync::Arc;
 use arc_swap::ArcSwap;
 use image::DynamicImage;
+use std::sync::Arc;
 
 pub struct Image {
     data: ArcSwap<Option<DynamicImage>>,
-    channel: (tokio::sync::broadcast::Sender<()>, tokio::sync::broadcast::Receiver<()>),
+    channel: (
+        tokio::sync::broadcast::Sender<()>,
+        tokio::sync::broadcast::Receiver<()>,
+    ),
 }
 
 impl Image {

@@ -86,8 +86,12 @@ impl View for TopPanel {
 
         while let Ok(notification) = self.vm_rx.try_recv() {
             match notification {
-                PropertyChangedNotification::HasCurrent => self.has_current = self.viewmodel.get_has_current(),
-                PropertyChangedNotification::HasPreview => self.has_preview = self.viewmodel.get_has_preview(),
+                PropertyChangedNotification::HasCurrent => {
+                    self.has_current = self.viewmodel.get_has_current()
+                }
+                PropertyChangedNotification::HasPreview => {
+                    self.has_preview = self.viewmodel.get_has_preview()
+                }
             }
         }
 

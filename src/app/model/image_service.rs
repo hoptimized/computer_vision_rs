@@ -1,7 +1,7 @@
+use crate::app::model::image::Image;
 use image::{DynamicImage, GrayImage};
 use rfd::FileHandle;
-use std::sync::{Arc, mpsc};
-use crate::app::model::image::Image;
+use std::sync::{mpsc, Arc};
 
 enum Message {
     ImageLoaded(DynamicImage),
@@ -33,13 +33,10 @@ impl ImageService {
     pub fn update(&self) {
         while let Ok(message) = self.message_channel.1.try_recv() {
             match message {
-                Message::ImageLoaded(new_image) => {
-                    self.reset(Some(new_image))
-                },
+                Message::ImageLoaded(new_image) => self.reset(Some(new_image)),
             }
         }
-        while let Ok(_) = self.message_channel.1.try_recv() {
-        }
+        while let Ok(_) = self.message_channel.1.try_recv() {}
     }
 
     pub fn load_new_image(&self, file: Option<FileHandle>) {

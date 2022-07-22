@@ -1,7 +1,7 @@
-use std::sync::{Arc, mpsc};
-use image::DynamicImage;
-use tokio::sync::broadcast;
 use crate::app::model;
+use image::DynamicImage;
+use std::sync::{mpsc, Arc};
+use tokio::sync::broadcast;
 
 #[derive(Clone)]
 #[allow(dead_code)]
@@ -14,7 +14,10 @@ pub enum PropertyChangedNotification {
 
 pub struct ImageFrame {
     tx: mpsc::Sender<crate::app::GuiAction>, // TODO: refactor
-    view_channel: (broadcast::Sender<PropertyChangedNotification>, broadcast::Receiver<PropertyChangedNotification>),
+    view_channel: (
+        broadcast::Sender<PropertyChangedNotification>,
+        broadcast::Receiver<PropertyChangedNotification>,
+    ),
 
     // properties
     accept_input: bool,
@@ -32,8 +35,8 @@ impl ImageFrame {
         title: &str,
         accept_input: bool,
         tx: mpsc::Sender<crate::app::GuiAction>, // TODO: refactor
-        model: Arc<model::Image>) -> Self
-    {
+        model: Arc<model::Image>,
+    ) -> Self {
         let model_rx = model.get_property_changed_rx();
 
         Self {
@@ -44,7 +47,7 @@ impl ImageFrame {
             accept_input,
             open: true,
             model,
-            model_rx
+            model_rx,
         }
     }
 
@@ -82,24 +85,36 @@ impl ImageFrame {
     #[allow(dead_code)]
     pub fn set_accept_input(&mut self, accept_input: bool) {
         self.accept_input = accept_input;
-        self.view_channel.0.send(PropertyChangedNotification::AcceptInput).ok();
+        self.view_channel
+            .0
+            .send(PropertyChangedNotification::AcceptInput)
+            .ok();
     }
 
     #[allow(dead_code)]
     pub fn set_image(&mut self, image: Arc<Option<DynamicImage>>) {
         self.image = image;
-        self.view_channel.0.send(PropertyChangedNotification::Image).ok();
+        self.view_channel
+            .0
+            .send(PropertyChangedNotification::Image)
+            .ok();
     }
 
     #[allow(dead_code)]
     pub fn set_open(&mut self, open: bool) {
         self.open = open;
-        self.view_channel.0.send(PropertyChangedNotification::Open).ok();
+        self.view_channel
+            .0
+            .send(PropertyChangedNotification::Open)
+            .ok();
     }
 
     #[allow(dead_code)]
     pub fn set_title(&mut self, title: String) {
         self.title = title;
-        self.view_channel.0.send(PropertyChangedNotification::Title).ok();
+        self.view_channel
+            .0
+            .send(PropertyChangedNotification::Title)
+            .ok();
     }
 }
