@@ -52,7 +52,7 @@ impl ImageFrame {
     }
 
     pub fn process_messages(&mut self) {
-        if let Ok(_) = self.model_rx.try_recv() {
+        if self.model_rx.try_recv().is_ok() {
             self.set_image(self.model.get());
         }
     }
