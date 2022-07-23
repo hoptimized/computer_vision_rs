@@ -1,43 +1,33 @@
-use crate::app::{GuiAction, View};
+use super::View;
+use crate::app::viewmodel;
+use crate::app::viewmodel::top_panel::PropertyChangedNotification;
 use egui::{Context, Ui};
-use std::sync::mpsc;
 
 pub struct TopPanel {
-    tx: mpsc::Sender<GuiAction>,
     has_current: bool,
     has_preview: bool,
+
+    viewmodel: viewmodel::TopPanel,
+    vm_rx: tokio::sync::broadcast::Receiver<PropertyChangedNotification>,
 }
 
 impl TopPanel {
-    pub fn new(tx: mpsc::Sender<GuiAction>) -> Self {
+    pub fn new(viewmodel: viewmodel::TopPanel) -> Self {
+        let vm_rx = viewmodel.get_receiver();
+
         Self {
-            tx,
             has_current: false,
             has_preview: false,
+            viewmodel,
+            vm_rx,
         }
-    }
-
-    pub fn set_has_current(&mut self, has_current: bool) {
-        self.has_current = has_current;
-    }
-
-    pub fn set_has_preview(&mut self, has_preview: bool) {
-        self.has_preview = has_preview;
-    }
-}
-
-impl View for TopPanel {
-    fn show(&mut self, ctx: &Context) {
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            self.ui(ui);
-        });
     }
 
     fn ui(&mut self, ui: &mut Ui) {
         egui::menu::bar(ui, |ui| {
             ui.menu_button("File", |ui| {
                 if ui.button("open").clicked() {
-                    self.tx.send(GuiAction::OpenFileDialog).ok();
+                    self.viewmodel.open_file_dialog();
                 }
 
                 ui.separator();
@@ -46,14 +36,14 @@ impl View for TopPanel {
                     .add_enabled(self.has_current, egui::Button::new("grayscale"))
                     .clicked()
                 {
-                    self.tx.send(GuiAction::ApplyGrayscale).ok();
+                    self.viewmodel.apply_grayscale();
                 }
 
                 if ui
                     .add_enabled(self.has_current, egui::Button::new("invert"))
                     .clicked()
                 {
-                    self.tx.send(GuiAction::ApplyInvert).ok();
+                    self.viewmodel.apply_invert();
                 }
 
                 ui.separator();
@@ -62,14 +52,14 @@ impl View for TopPanel {
                     .add_enabled(self.has_preview, egui::Button::new("accept"))
                     .clicked()
                 {
-                    self.tx.send(GuiAction::AcceptOperation).ok();
+                    self.viewmodel.accept_operation();
                 }
 
                 if ui
                     .add_enabled(self.has_preview, egui::Button::new("discard"))
                     .clicked()
                 {
-                    self.tx.send(GuiAction::DiscardOperation).ok();
+                    self.viewmodel.discard_operation();
                 }
 
                 ui.separator();
@@ -81,9 +71,30 @@ impl View for TopPanel {
                     )
                     .clicked()
                 {
-                    self.tx.send(GuiAction::ResetAll).ok();
+                    self.viewmodel.reset_images();
                 }
             });
+        });
+    }
+}
+
+impl View for TopPanel {
+    fn show(&mut self, ctx: &Context) {
+        self.viewmodel.process_messages();
+
+        while let Ok(notification) = self.vm_rx.try_recv() {
+            match notification {
+                PropertyChangedNotification::HasCurrent => {
+                    self.has_current = self.viewmodel.get_has_current()
+                }
+                PropertyChangedNotification::HasPreview => {
+                    self.has_preview = self.viewmodel.get_has_preview()
+                }
+            }
+        }
+
+        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+            self.ui(ui);
         });
     }
 }
