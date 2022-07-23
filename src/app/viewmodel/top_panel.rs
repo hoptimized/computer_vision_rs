@@ -1,4 +1,4 @@
-use crate::app::model::{operations, ImageService};
+use crate::app::model::ImageService;
 use crate::app::{model, GuiAction};
 use std::sync::{mpsc, Arc};
 use tokio::sync::broadcast;
@@ -70,11 +70,11 @@ impl TopPanel {
     }
 
     pub fn apply_grayscale(&mut self) {
-        self.image_service.preview_operation(operations::grayscale);
+        self.image_service.apply_grayscale();
     }
 
     pub fn apply_invert(&mut self) {
-        self.image_service.preview_operation(operations::invert);
+        self.image_service.apply_invert();
     }
 
     pub fn accept_operation(&mut self) {
@@ -97,7 +97,6 @@ impl TopPanel {
         self.has_preview
     }
 
-    #[allow(dead_code)]
     fn set_has_current(&mut self, has_current: bool) {
         self.has_current = has_current;
         self.view_channel
@@ -106,7 +105,6 @@ impl TopPanel {
             .ok();
     }
 
-    #[allow(dead_code)]
     fn set_has_preview(&mut self, has_preview: bool) {
         self.has_preview = has_preview;
         self.view_channel

@@ -4,15 +4,18 @@ use crate::app::viewmodel::image_frame::PropertyChangedNotification;
 use egui::{ColorImage, Context, Ui};
 use egui_extras::RetainedImage;
 use image::DynamicImage;
+use tokio::sync::broadcast;
 
 pub struct ImageFrame {
+    // properties
     accept_input: bool,
     image: Option<RetainedImage>,
     open: bool,
     title: String,
 
+    // dependencies
     viewmodel: viewmodel::ImageFrame,
-    vm_rx: tokio::sync::broadcast::Receiver<viewmodel::image_frame::PropertyChangedNotification>,
+    vm_rx: broadcast::Receiver<PropertyChangedNotification>,
 }
 
 impl ImageFrame {
@@ -22,7 +25,7 @@ impl ImageFrame {
         let mut result = Self {
             accept_input: viewmodel.get_accept_input(),
             image: None,
-            open: true,
+            open: viewmodel.get_open(),
             title: viewmodel.get_title().clone(),
             vm_rx,
             viewmodel,

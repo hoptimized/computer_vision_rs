@@ -34,13 +34,13 @@ impl ImageFrame {
     pub fn new(
         title: &str,
         accept_input: bool,
-        tx: mpsc::Sender<crate::app::GuiAction>, // TODO: refactor
+        tx: mpsc::Sender<crate::app::GuiAction>,
         model: Arc<model::Image>,
     ) -> Self {
         let model_rx = model.get_property_changed_rx();
 
         Self {
-            tx, // TODO: refactor
+            tx,
             view_channel: broadcast::channel(32),
             title: title.to_string(),
             image: Arc::new(None),
@@ -70,7 +70,6 @@ impl ImageFrame {
     }
 
     pub fn get_image(&self) -> Arc<Option<DynamicImage>> {
-        // TODO: arc should be cached on VM
         self.model.get()
     }
 

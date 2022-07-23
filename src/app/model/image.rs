@@ -1,20 +1,18 @@
 use arc_swap::ArcSwap;
 use image::DynamicImage;
 use std::sync::Arc;
+use tokio::sync::broadcast;
 
 pub struct Image {
     data: ArcSwap<Option<DynamicImage>>,
-    channel: (
-        tokio::sync::broadcast::Sender<()>,
-        tokio::sync::broadcast::Receiver<()>,
-    ),
+    channel: (broadcast::Sender<()>, broadcast::Receiver<()>),
 }
 
 impl Image {
     pub fn new() -> Self {
         Self {
             data: ArcSwap::from(Arc::new(None)),
-            channel: tokio::sync::broadcast::channel(256),
+            channel: broadcast::channel(32),
         }
     }
 
@@ -43,7 +41,7 @@ impl Image {
     }
 
     #[allow(dead_code)]
-    pub fn get_property_changed_rx(&self) -> tokio::sync::broadcast::Receiver<()> {
+    pub fn get_property_changed_rx(&self) -> broadcast::Receiver<()> {
         self.channel.0.subscribe()
     }
 

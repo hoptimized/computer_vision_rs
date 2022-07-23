@@ -1,9 +1,7 @@
-use egui::{Context, Ui};
-
 use super::View;
-
 use crate::app::viewmodel;
 use crate::app::viewmodel::top_panel::PropertyChangedNotification;
+use egui::{Context, Ui};
 
 pub struct TopPanel {
     has_current: bool,
