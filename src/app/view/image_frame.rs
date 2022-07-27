@@ -1,10 +1,11 @@
 use super::View;
-use crate::app::viewmodel;
 use crate::app::viewmodel::image_frame::PropertyChangedNotification;
+use crate::app::{modal, viewmodel};
 use egui::{ColorImage, Context, Ui};
 use egui_extras::RetainedImage;
 use image::DynamicImage;
-use tokio::sync::broadcast;
+use rfd::FileHandle;
+use tokio::sync::{broadcast, oneshot};
 
 pub struct ImageFrame {
     // properties
@@ -12,6 +13,9 @@ pub struct ImageFrame {
     image: Option<RetainedImage>,
     open: bool,
     title: String,
+
+    // promises
+    rfd_promise: Option<oneshot::Receiver<Option<FileHandle>>>,
 
     // dependencies
     viewmodel: viewmodel::ImageFrame,
@@ -27,6 +31,7 @@ impl ImageFrame {
             image: None,
             open: viewmodel.get_open(),
             title: viewmodel.get_title().clone(),
+            rfd_promise: None,
             vm_rx,
             viewmodel,
         };
@@ -62,7 +67,7 @@ impl ImageFrame {
             _ => {
                 ui.label("nothing to show");
                 if self.accept_input && ui.add(egui::widgets::Button::new("Open Image")).clicked() {
-                    self.viewmodel.open_file_dialog();
+                    self.rfd_promise = Some(modal::open_file_dialog());
                 }
             }
         }
@@ -72,6 +77,13 @@ impl ImageFrame {
 impl View for ImageFrame {
     fn show(&mut self, ctx: &Context) {
         self.viewmodel.process_messages();
+
+        if let Some(rfd_promise) = &mut self.rfd_promise {
+            if let Ok(file) = rfd_promise.try_recv() {
+                self.viewmodel.open_file(file);
+                self.rfd_promise.take();
+            }
+        }
 
         let mut open = self.open;
         let title = self.title.clone();

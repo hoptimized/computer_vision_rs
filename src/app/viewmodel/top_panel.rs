@@ -1,6 +1,7 @@
+use crate::app::model;
 use crate::app::model::ImageService;
-use crate::app::{model, GuiAction};
-use std::sync::{mpsc, Arc};
+use rfd::FileHandle;
+use std::sync::Arc;
 use tokio::sync::broadcast;
 
 #[derive(Clone)]
@@ -10,7 +11,6 @@ pub enum PropertyChangedNotification {
 }
 
 pub struct TopPanel {
-    tx: mpsc::Sender<GuiAction>,
     view_channel: (
         broadcast::Sender<PropertyChangedNotification>,
         broadcast::Receiver<PropertyChangedNotification>,
@@ -30,7 +30,6 @@ pub struct TopPanel {
 
 impl TopPanel {
     pub fn new(
-        tx: mpsc::Sender<GuiAction>,
         image_service: Arc<ImageService>,
         current_image: Arc<model::Image>,
         preview_image: Arc<model::Image>,
@@ -39,7 +38,6 @@ impl TopPanel {
         let preview_image_rx = preview_image.get_property_changed_rx();
 
         Self {
-            tx, // TODO: remove / replace
             view_channel: broadcast::channel(32),
             has_current: false,
             has_preview: false,
@@ -51,8 +49,8 @@ impl TopPanel {
         }
     }
 
-    pub fn open_file_dialog(&mut self) {
-        self.tx.send(GuiAction::OpenFileDialog).ok();
+    pub fn open_file(&mut self, file: Option<FileHandle>) {
+        self.image_service.load_new_image(file);
     }
 
     pub fn process_messages(&mut self) {

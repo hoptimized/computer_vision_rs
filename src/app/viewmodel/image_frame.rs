@@ -1,6 +1,8 @@
 use crate::app::model;
+use crate::app::model::ImageService;
 use image::DynamicImage;
-use std::sync::{mpsc, Arc};
+use rfd::FileHandle;
+use std::sync::Arc;
 use tokio::sync::broadcast;
 
 #[derive(Clone)]
@@ -13,7 +15,6 @@ pub enum PropertyChangedNotification {
 }
 
 pub struct ImageFrame {
-    tx: mpsc::Sender<crate::app::GuiAction>, // TODO: refactor
     view_channel: (
         broadcast::Sender<PropertyChangedNotification>,
         broadcast::Receiver<PropertyChangedNotification>,
@@ -26,6 +27,7 @@ pub struct ImageFrame {
     title: String,
 
     // dependencies
+    image_service: Arc<ImageService>,
     model: Arc<model::Image>,
     model_rx: broadcast::Receiver<()>,
 }
@@ -34,18 +36,18 @@ impl ImageFrame {
     pub fn new(
         title: &str,
         accept_input: bool,
-        tx: mpsc::Sender<crate::app::GuiAction>,
+        image_service: Arc<ImageService>,
         model: Arc<model::Image>,
     ) -> Self {
         let model_rx = model.get_property_changed_rx();
 
         Self {
-            tx,
             view_channel: broadcast::channel(32),
             title: title.to_string(),
             image: Arc::new(None),
             accept_input,
             open: true,
+            image_service,
             model,
             model_rx,
         }
@@ -61,8 +63,8 @@ impl ImageFrame {
         self.view_channel.0.subscribe()
     }
 
-    pub fn open_file_dialog(&self) {
-        self.tx.send(crate::app::GuiAction::OpenFileDialog).ok();
+    pub fn open_file(&self, file: Option<FileHandle>) {
+        self.image_service.load_new_image(file);
     }
 
     pub fn get_accept_input(&self) -> bool {

@@ -1,25 +1,17 @@
-use rfd::FileHandle;
 use std::future::Future;
-use std::sync::{mpsc, Arc};
+use std::sync::Arc;
 
+mod modal;
 mod model;
 mod view;
 mod viewmodel;
 
 use model::ImageService;
 
-pub enum GuiAction {
-    OpenFileDialog,
-    LoadImage(Option<FileHandle>),
-}
-
 /// We derive Deserialize/Serialize so we can persist app state on shutdown. (currently not used)
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
 pub struct MyApp {
-    #[serde(skip)]
-    message_channel: (mpsc::Sender<GuiAction>, mpsc::Receiver<GuiAction>),
-
     #[serde(skip)]
     views: Vec<Box<dyn view::View>>,
 
@@ -34,11 +26,8 @@ impl Default for MyApp {
         let model_current = image_service.get_current_image();
         let model_preview = image_service.get_preview_image();
 
-        let (tx, rx) = mpsc::channel(); // TODO: remove this
-
         let views: Vec<Box<dyn view::View>> = vec![
             Box::new(view::TopPanel::new(viewmodel::TopPanel::new(
-                tx.clone(),
                 Arc::clone(&image_service),
                 Arc::clone(&model_current),
                 Arc::clone(&model_preview),
@@ -47,20 +36,19 @@ impl Default for MyApp {
                 Box::new(view::ImageFrame::new(viewmodel::ImageFrame::new(
                     "Current",
                     true,
-                    tx.clone(),
-                    model_current.clone(),
+                    Arc::clone(&image_service),
+                    Arc::clone(&model_current),
                 ))),
                 Box::new(view::ImageFrame::new(viewmodel::ImageFrame::new(
                     "Preview",
                     false,
-                    tx.clone(),
-                    model_preview.clone(),
+                    Arc::clone(&image_service),
+                    Arc::clone(&model_preview),
                 ))),
             ])),
         ];
 
         Self {
-            message_channel: (tx, rx),
             views,
             image_service,
         }
@@ -77,20 +65,6 @@ impl MyApp {
 
         Default::default()
     }
-
-    fn open_file_dialog(&mut self) {
-        let task = rfd::AsyncFileDialog::new()
-            .add_filter("Image files", &["png", "jpg", "jpeg"])
-            .set_directory("/")
-            .pick_file();
-
-        let tx = self.message_channel.0.clone();
-
-        execute(async move {
-            let file = task.await;
-            tx.send(GuiAction::LoadImage(file)).ok();
-        });
-    }
 }
 
 impl eframe::App for MyApp {
@@ -101,13 +75,6 @@ impl eframe::App for MyApp {
 
     /// Called each time the UI needs repainting
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        while let Ok(message) = self.message_channel.1.try_recv() {
-            match message {
-                GuiAction::OpenFileDialog => self.open_file_dialog(),
-                GuiAction::LoadImage(file) => self.image_service.load_new_image(file),
-            };
-        }
-
         self.image_service.update();
 
         for view in self.views.iter_mut() {

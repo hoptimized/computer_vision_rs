@@ -1,11 +1,15 @@
 use super::View;
-use crate::app::viewmodel;
 use crate::app::viewmodel::top_panel::PropertyChangedNotification;
+use crate::app::{modal, viewmodel};
 use egui::{Context, Ui};
+use rfd::FileHandle;
+use tokio::sync::oneshot;
 
 pub struct TopPanel {
     has_current: bool,
     has_preview: bool,
+
+    rfd_promise: Option<oneshot::Receiver<Option<FileHandle>>>,
 
     viewmodel: viewmodel::TopPanel,
     vm_rx: tokio::sync::broadcast::Receiver<PropertyChangedNotification>,
@@ -18,6 +22,7 @@ impl TopPanel {
         Self {
             has_current: false,
             has_preview: false,
+            rfd_promise: None,
             viewmodel,
             vm_rx,
         }
@@ -27,7 +32,7 @@ impl TopPanel {
         egui::menu::bar(ui, |ui| {
             ui.menu_button("File", |ui| {
                 if ui.button("open").clicked() {
-                    self.viewmodel.open_file_dialog();
+                    self.rfd_promise = Some(modal::open_file_dialog());
                 }
 
                 ui.separator();
@@ -81,6 +86,13 @@ impl TopPanel {
 impl View for TopPanel {
     fn show(&mut self, ctx: &Context) {
         self.viewmodel.process_messages();
+
+        if let Some(rfd_promise) = &mut self.rfd_promise {
+            if let Ok(file) = rfd_promise.try_recv() {
+                self.viewmodel.open_file(file);
+                self.rfd_promise.take();
+            }
+        }
 
         while let Ok(notification) = self.vm_rx.try_recv() {
             match notification {
