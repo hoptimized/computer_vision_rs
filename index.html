@@ -1,19 +1,4 @@
-<!DOCTYPE html>
-<html>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
-<!-- Disable zooming: -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-<head>
-    <title>computer_vision_rs</title>
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="white">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#404040">
-    <link rel="apple-touch-icon" href="./icon_ios_touch_192.png">
-
-    <style>
-        html {
+<!doctype html><html><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><head><title>computer_vision_rs</title><link rel="manifest" href="./manifest.json"><meta name="theme-color" media="(prefers-color-scheme: light)" content="white"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#404040"><link rel="apple-touch-icon" href="./icon_ios_touch_192.png"><style>html {
             /* Remove touch delay: */
             touch-action: manipulation;
         }
@@ -93,22 +78,7 @@
             100% {
                 transform: rotate(360deg);
             }
-        }
-    </style>
-<script defer src="index.js"></script></head>
-
-<body>
-    <!-- The WASM code will resize the canvas dynamically -->
-    <canvas id="the_canvas_id"></canvas>
-    <div class="centered" id="center_text">
-        <p style="font-size:16px">
-            Loading…
-        </p>
-        <div class="lds-dual-ring"></div>
-    </div>
-
-    <script>
-        // The `--no-modules`-generated JS from `wasm-bindgen` attempts to use
+        }</style><script defer="defer" src="index.js"></script></head><body><canvas id="the_canvas_id"></canvas><div class="centered" id="center_text"><p style="font-size:16px">Loading…</p><div class="lds-dual-ring"></div></div><script>// The `--no-modules`-generated JS from `wasm-bindgen` attempts to use
         // `WebAssembly.instantiateStreaming` to instantiate the wasm module,
         // but this doesn't work with `file://` urls. This example is frequently
         // viewed by simply opening `index.html` in a browser (with a `file://`
@@ -117,21 +87,4 @@
         // Work around this for now by deleting the function to ensure that the
         // `no_modules.js` script doesn't have access to it. You won't need this
         // hack when deploying over HTTP.
-        delete WebAssembly.instantiateStreaming;
-    </script>
-
-    <!--<script src="index.js"></script>-->
-
-    <!--Register Service Worker-->
-    <!--<script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js');
-            });
-        }
-    </script>-->
-</body>
-
-</html>
-
-<!-- Powered by egui: https://github.com/emilk/egui/ -->
+        delete WebAssembly.instantiateStreaming;</script></body></html>
