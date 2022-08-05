@@ -68,13 +68,13 @@ jobs:
           npm ci
           npm run build
       - name: "[BUILD] cache results"
-        if: ${{ github.ref == 'refs/heads/main' }}
+        #if: ${{ github.ref == 'refs/heads/main' }}
         uses: actions/cache@v3
         with:
           path: www/dist
           key: BUILD_${{ matrix.name }}_${{ github.sha }}
   CD:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    #if: ${{ github.ref == 'refs/heads/main' }}
     needs:
       - CI-Native
       - CI-Web
