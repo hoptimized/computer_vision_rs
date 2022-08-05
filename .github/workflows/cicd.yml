@@ -65,7 +65,9 @@ jobs:
       #- name: "[SETUP] install build dependencies"
       #  run: sudo apt update && sudo apt install binaryen
       - name: "[BUILD] run build"
-        run: npm run build
+        run: |
+          npm ci
+          npm run build
       - name: "[BUILD] cache results (WASM32)"
         if: ${{ matrix.name == 'WASM32' && github.ref == 'refs/heads/main' }}
         uses: actions/cache@v3
