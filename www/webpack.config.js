@@ -1,7 +1,9 @@
 const path = require('path');
+
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 module.exports = {
     entry: path.resolve(__dirname, "index.js"),
@@ -10,12 +12,17 @@ module.exports = {
         filename: 'index.js'
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, "index.html"),
-        }),
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, ".."),
             outDir: path.resolve(__dirname, "pkg"),
+        }),
+        new WorkboxPlugin.GenerateSW({
+            clientsClaim: true,
+            skipWaiting: true,
+            maximumFileSizeToCacheInBytes: 10000000,
+        }),
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, "index.html"),
         }),
         new CopyWebpackPlugin({
             patterns: [

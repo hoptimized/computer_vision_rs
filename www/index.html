@@ -120,16 +120,18 @@
         delete WebAssembly.instantiateStreaming;
     </script>
 
-    <!--<script src="index.js"></script>-->
-
     <!--Register Service Worker-->
-    <!--<script>
+    <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js');
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
             });
         }
-    </script>-->
+    </script>
 </body>
 
 </html>
