@@ -1,4 +1,5 @@
-/target
-/.idea
-/dist/computer_vision_rs.js
-/dist/computer_vision_rs_bg.wasm
+.idea
+node_modules
+target
+www/dist
+www/pkg
