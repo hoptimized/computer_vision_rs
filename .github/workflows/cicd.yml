@@ -72,7 +72,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: www/dist
-          key: BUILD_${{ matrix.name }}_${{ github.sha }}
+          key: BUILD_WASM32_${{ github.sha }}
   CD:
     #if: ${{ github.ref == 'refs/heads/main' }}
     needs:
