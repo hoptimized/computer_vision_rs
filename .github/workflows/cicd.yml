@@ -86,7 +86,7 @@ jobs:
         id: cache
         uses: actions/cache@v3
         with:
-          path: dist
+          path: www/dist
           key: BUILD_WASM32_${{ github.sha }}
       - name: "(exit on cache miss)"
         if: steps.cache.outputs.cache-hit != 'true'
@@ -94,4 +94,4 @@ jobs:
       - name: "deploy to gh-pages"
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist
+          folder: www/dist
