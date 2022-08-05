@@ -1,5 +1,2 @@
 .idea
-node_modules
 target
-www/dist
-www/pkg

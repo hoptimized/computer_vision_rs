@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "build": "webpack build --config ./www/webpack.config.js",
-    "serve": "webpack serve --config ./www/webpack.config.js"
+    "build": "webpack build",
+    "serve": "webpack serve"
   },
   "devDependencies": {
     "@wasm-tool/wasm-pack-plugin": "^1.6.0",
