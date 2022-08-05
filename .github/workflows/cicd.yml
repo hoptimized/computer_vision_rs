@@ -4,7 +4,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  CI:
+  CI-Native:
     strategy:
       fail-fast: false
       matrix:
@@ -13,10 +13,6 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             flags: '--all-features'
-          - name: WASM32
-            os: ubuntu-latest
-            target: wasm32-unknown-unknown
-            flags: '--all-features --lib'
           - name: Windows
             os: windows-latest
             target: x86_64-pc-windows-msvc
@@ -39,12 +35,6 @@ jobs:
       - name: "[SETUP] install build dependencies (Ubuntu)"
         if: matrix.name == 'Ubuntu'
         run: sudo apt update && sudo apt install libgtk-3-dev
-      - name: "[SETUP] install build dependencies (WASM32)"
-        if: matrix.name == 'WASM32'
-        run: |
-          sudo apt update && sudo apt install binaryen
-          rustup target add wasm32-unknown-unknown
-          cargo install wasm-bindgen-cli --version $(cargo pkgid wasm-bindgen | grep -Po '(?<=#wasm-bindgen[@,:])(.*)')
       - name: "[LINT] fmt"
         run: |
           rustup component add rustfmt
@@ -53,33 +43,40 @@ jobs:
         run: |
           rustup component add clippy
           cargo clippy --target ${{ matrix.target }} ${{ matrix.flags }} -- -D warnings
-      - name: "[BUILD] build (Ubuntu, Windows, MacOS)"
-        if: matrix.name != 'WASM32'
+      - name: "[BUILD] run build"
         uses: actions-rs/cargo@v1
         with:
           command: build
           args: --target ${{ matrix.target }} ${{ matrix.flags }}
-      - name: "[BUILD] build (WASM32)"
-        if: matrix.name == 'WASM32'
-        run: ./build_web.sh
-      - name: "[BUILD] cache results (WASM32)"
-        if: ${{ matrix.name == 'WASM32' && github.ref == 'refs/heads/main' }}
-        uses: actions/cache@v3
-        with:
-          path: dist
-          key: BUILD_${{ matrix.name }}_${{ github.sha }}
       - name: "[TEST] install test dependencies (Ubuntu)"
         if: matrix.name == 'Ubuntu'
         run: sudo apt update && sudo apt install libgtk-3-dev
-      - name: "[TEST] run tests (Ubuntu, Windows, MacOS)"
-        if: matrix.name != 'WASM32'
+      - name: "[TEST] run tests"
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --target ${{ matrix.target }} ${{ matrix.flags }}
+  CI-Web:
+    name: "CI (web)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "[SETUP] checkout repository"
+        uses: actions/checkout@v2
+      #- name: "[SETUP] install build dependencies"
+      #  run: sudo apt update && sudo apt install binaryen
+      - name: "[BUILD] run build"
+        run: npm run build
+      - name: "[BUILD] cache results (WASM32)"
+        if: ${{ matrix.name == 'WASM32' && github.ref == 'refs/heads/main' }}
+        uses: actions/cache@v3
+        with:
+          path: www/dist
+          key: BUILD_${{ matrix.name }}_${{ github.sha }}
   CD:
     if: ${{ github.ref == 'refs/heads/main' }}
-    needs: CI
+    needs:
+      - CI-Native
+      - CI-Web
     runs-on: ubuntu-latest
     steps:
       - name: "checkout repository"
