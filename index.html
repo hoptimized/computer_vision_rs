@@ -87,4 +87,12 @@
         // Work around this for now by deleting the function to ensure that the
         // `no_modules.js` script doesn't have access to it. You won't need this
         // hack when deploying over HTTP.
-        delete WebAssembly.instantiateStreaming;</script></body></html>
+        delete WebAssembly.instantiateStreaming;</script><script>if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('SW registered: ', registration);
+                }).catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+        }</script></body></html>
