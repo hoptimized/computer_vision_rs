@@ -14,7 +14,11 @@ module.exports = {
     plugins: [
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, ".."),
-            outDir: path.resolve(__dirname, "pkg"),
+            outDir: path.resolve(__dirname, "pkg/frontend"),
+        }),
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, "../backend"),
+            outDir: path.resolve(__dirname, "pkg/backend"),
         }),
         new WorkboxPlugin.GenerateSW({
             clientsClaim: true,

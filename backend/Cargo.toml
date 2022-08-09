@@ -1,0 +1,12 @@
+[package]
+name = "computer_vision_rs-backend"
+version = "0.1.0"
+authors = ["Tim Hopp <tim11071992@gmail.com>"]
+edition = "2021"
+rust-version = "1.60"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2.82"
