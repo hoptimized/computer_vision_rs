@@ -11,5 +11,8 @@
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.3",
     "workbox-webpack-plugin": "^6.5.4"
+  },
+  "dependencies": {
+    "comlink": "^4.3.1"
   }
 }

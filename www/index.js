@@ -1,3 +1,5 @@
+import * as Comlink from 'comlink';
+
 async function init_frontend() {
     console.debug("loading wasm…");
 
@@ -33,18 +35,24 @@ async function init_frontend() {
 async function init_backend() {
     console.log("initializing worker thread");
 
-    let worker = new Worker(
-        new URL('./wasm-worker.js', import.meta.url),
-        { type: 'module' }
-    );
+    let {
+        initialized,
+        workerApi: worker
+    } = await Comlink.wrap(
+        new Worker(
+            new URL('./wasm-worker.js', import.meta.url),
+            { type: 'module'}
+        )
+    ).handle;
 
-    worker.onmessage = (e) => {
-        console.log(e.data);
+    if (!(await initialized)) {
+        console.log("worker thread initialization failed");
+        return;
     }
 
     console.log("worker thread initialized");
 
-    worker.postMessage(8);
+    console.log(await worker.double(3));
 }
 
 (async function init() {

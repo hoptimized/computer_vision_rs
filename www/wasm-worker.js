@@ -1,12 +1,21 @@
-(async function init() {
-    console.log("initializing worker");
+import * as Comlink from 'comlink';
 
-    let wasm_bindgen = await import('./pkg/backend/index.js');
+async function initApi() {
+    let workerApi = await (async () => {
+        const wasm_bindgen = await import('./pkg/backend/index.js');
+        await wasm_bindgen.default();
 
-    self.onmessage = async e => {
-        var worker_result = wasm_bindgen.double(e.data);
-        self.postMessage(worker_result);
-    };
+        return {
+            double: (num) => wasm_bindgen.double(num),
+        };
+    })();
 
-    console.log("worker initialized");
-})();
+    return Comlink.proxy({
+        initialized: !!workerApi,
+        workerApi
+    });
+}
+
+Comlink.expose({
+    handle: initApi()
+});
