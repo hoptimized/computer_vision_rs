@@ -1,27 +1,12 @@
-import * as Comlink from 'comlink';
-import { threads } from 'wasm-feature-detect';
+(async function init() {
+    console.log("initializing worker");
 
-async function initApi() {
-    let workerApi = await (async () => {
-        if (!(await threads())) return;
+    let wasm_bindgen = await import('./pkg/backend/index.js');
 
-        const wasm_bindgen = await import('./pkg/backend/index.js');
+    self.onmessage = async e => {
+        var worker_result = wasm_bindgen.double(e.data);
+        self.postMessage(worker_result);
+    };
 
-        await wasm_bindgen.default();
-        await wasm_bindgen.initThreadPool(navigator.hardwareConcurrency);
-
-        return {
-            double: (num) => wasm_bindgen.double(num),
-            sum: (nums) => wasm_bindgen.sum(nums),
-        };
-    })();
-
-    return Comlink.proxy({
-        initialized: !!workerApi,
-        workerApi
-    });
-}
-
-Comlink.expose({
-    handle: initApi()
-});
+    console.log("worker initialized");
+})();

@@ -15,12 +15,10 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, ".."),
             outDir: path.resolve(__dirname, "pkg/frontend"),
-            extraArgs: "--target bundler"
         }),
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, "../backend"),
             outDir: path.resolve(__dirname, "pkg/backend"),
-            extraArgs: "--target web"
         }),
         new WorkboxPlugin.GenerateSW({
             clientsClaim: true,
@@ -42,10 +40,6 @@ module.exports = {
     devServer: {
         static: {
             directory: path.join(__dirname, 'dist'),
-        },
-        headers: {
-            "Cross-Origin-Embedder-Policy": "require-corp",
-            "Cross-Origin-Opener-Policy": "same-origin",
         },
         port: 8080,
     },
