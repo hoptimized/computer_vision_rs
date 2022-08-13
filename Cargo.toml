@@ -34,6 +34,7 @@ console_error_panic_hook = "0.1.6"
 tracing-wasm = "0.2"
 wasm-bindgen = "0.2.82"
 wasm-bindgen-futures = "0.4.31"
+web-sys = { version = "0.3.59", features = ["console", "MessageEvent", "Worker"] }
 
 [profile.release]
 opt-level = 2 # fast and small wasm

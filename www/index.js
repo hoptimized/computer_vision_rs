@@ -21,7 +21,7 @@ async function init_frontend() {
         <p>
             An error occurred during loading:
         </p>
-        <p style="font-family:Courier New">
+        <p style="font-family:Courier New,serif">
             ${error}
         </p>
         <p style="font-size:14px">
@@ -30,24 +30,6 @@ async function init_frontend() {
     }
 }
 
-async function init_backend() {
-    console.log("initializing worker thread");
-
-    let worker = new Worker(
-        new URL('./wasm-worker.js', import.meta.url),
-        { type: 'module' }
-    );
-
-    worker.onmessage = (e) => {
-        console.log(e.data);
-    }
-
-    console.log("worker thread initialized");
-
-    worker.postMessage(8);
-}
-
 (async function init() {
-    await init_backend();
     await init_frontend();
 })();

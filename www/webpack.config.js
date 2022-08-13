@@ -5,7 +5,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 const WorkboxPlugin = require('workbox-webpack-plugin');
 
-module.exports = {
+const mode = "development";
+const stats = "minimal";
+const experiments = { asyncWebAssembly: true };
+
+const frontend = {
     entry: path.resolve(__dirname, "index.js"),
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -15,10 +19,6 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, ".."),
             outDir: path.resolve(__dirname, "pkg/frontend"),
-        }),
-        new WasmPackPlugin({
-            crateDirectory: path.resolve(__dirname, "../backend"),
-            outDir: path.resolve(__dirname, "pkg/backend"),
         }),
         new WorkboxPlugin.GenerateSW({
             clientsClaim: true,
@@ -43,9 +43,28 @@ module.exports = {
         },
         port: 8080,
     },
-    mode: 'production',
-    stats: 'minimal',
-    experiments: {
-        asyncWebAssembly: true
-    }
+    mode,
+    stats,
+    experiments,
 };
+
+const backend = {
+    entry: path.resolve(__dirname, "wasm-worker.js"),
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'wasm-worker.js'
+    },
+    target: "webworker",
+    plugins: [
+        new WasmPackPlugin({
+            crateDirectory: path.resolve(__dirname, "../backend"),
+            outDir: path.resolve(__dirname, "pkg/backend"),
+            extraArgs: "--target web",
+        }),
+    ],
+    mode,
+    stats,
+    experiments,
+};
+
+module.exports = [frontend, backend];

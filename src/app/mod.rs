@@ -6,6 +6,7 @@ mod model;
 mod view;
 mod viewmodel;
 
+use model::Backend;
 use model::ImageService;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown. (currently not used)
@@ -17,10 +18,17 @@ pub struct MyApp {
 
     #[serde(skip)]
     image_service: Arc<ImageService>,
+
+    #[serde(skip)]
+    temp_backend: Arc<Backend>,
 }
 
 impl Default for MyApp {
     fn default() -> Self {
+        let backend = Backend::new(); // TODO: inject backend into where it belongs
+        backend.double(123); // TODO: remove test
+        backend.double(11); // TODO: remove test
+
         let image_service = Arc::new(ImageService::new());
 
         let model_current = image_service.get_current_image();
@@ -51,6 +59,7 @@ impl Default for MyApp {
         Self {
             views,
             image_service,
+            temp_backend: Arc::new(backend),
         }
     }
 }
